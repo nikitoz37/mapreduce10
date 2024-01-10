@@ -45,7 +45,7 @@ class Word(db.Model):
         self.num = num
     
     def json(self):
-        return {'id': self.id,'word': self.word, 'email': self.num}
+        return {'id':self.id, 'Слово':self.word, 'Кол-во':self.num}
 
 
 time.sleep(10)
