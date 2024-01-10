@@ -9,7 +9,8 @@ from flask import (
     jsonify
 ) 
 import requests
-from flask_sqlalchemy import SQLAlchemy, desc
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import insert
 import asyncio
 import aiohttp
