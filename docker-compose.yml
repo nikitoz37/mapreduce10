@@ -1,0 +1,81 @@
+version: '3.8'
+ 
+services:
+  db:
+    container_name: db
+    restart: always
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: top_words_db
+    volumes:
+      - pgdata:/var/lib/postgresql
+    #  - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mapreduce-network
+
+  master:
+    container_name: master
+    restart: always
+    build: 
+      context: ./master
+      dockerfile: master.Dockerfile
+    environment:
+      DB_URL: postgresql://postgres:postgres@db:5432/top_words_db
+    ports:
+      - "5000:5000"
+    links:
+      - db:db
+      - slave1:slave1
+      - slave2:slave2
+    depends_on:
+      - db
+      - slave1
+      - slave2
+    networks:
+      - mapreduce-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  slave1:
+    container_name: slave1
+    restart: always
+    build: 
+      context: ./slave
+      dockerfile: slave1.Dockerfile
+    environment:
+      FLASK_DEBUG: "true"
+    ports:
+      - "5001:5000"
+    networks:
+      - mapreduce-network
+
+  slave2:
+    container_name: slave2
+    restart: always
+    build: 
+      context: ./slave
+      dockerfile: slave2.Dockerfile
+    environment:
+      FLASK_DEBUG: "true"
+    ports:
+      - "5002:5000"
+    networks:
+      - mapreduce-network
+
+
+volumes:
+  pgdata: #{}
+
+
+networks:
+  mapreduce-network:
+    driver: bridge
+  #  internal: False
+  #  ipam:
+  #   driver: default
+  #   config:
+  #     - subnet: 127.16.238.0/24
